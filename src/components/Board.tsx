@@ -25,6 +25,7 @@ import {
   type Quadrant,
   type Task,
 } from "@/lib/tasks";
+import Logo from "./Logo";
 import s from "./board.module.css";
 
 type Filter = "all" | Domain;
@@ -39,6 +40,7 @@ export default function Board() {
   const [filter, setFilter] = useState<Filter>("all");
   const [showDone, setShowDone] = useState(false);
   const [justAdded, setJustAdded] = useState<string | null>(null);
+  const [landing, setLanding] = useState(true);
 
   const [domain, setDomain] = useState<Domain>("work");
   const [title, setTitle] = useState("");
@@ -52,7 +54,11 @@ export default function Board() {
     setNow(Date.now());
     setHydrated(true);
     const tick = window.setInterval(() => setNow(Date.now()), 60_000);
-    return () => window.clearInterval(tick);
+    const settle = window.setTimeout(() => setLanding(false), 900);
+    return () => {
+      window.clearInterval(tick);
+      window.clearTimeout(settle);
+    };
   }, []);
 
   useEffect(() => {
@@ -172,7 +178,10 @@ export default function Board() {
     <div className={s.page}>
       <header className={s.header}>
         <div className={s.brand}>
-          <h1 className={s.wordmark}>Leverage</h1>
+          <div className={s.brandRow}>
+            <Logo />
+            <h1 className={s.wordmark}>Leverage</h1>
+          </div>
           <p className={s.tagline}>What to do next, by effort and payoff.</p>
         </div>
         <div className={s.headerRight}>
@@ -276,7 +285,7 @@ export default function Board() {
             </div>
           )}
 
-          <p className={`${s.preview} ${s[`q_${previewQuadrant}`]}`}>
+          <p key={previewQuadrant} className={`${s.preview} ${s[`q_${previewQuadrant}`]}`}>
             <strong>{QUADRANT_META[previewQuadrant].name}.</strong>{" "}
             {QUADRANT_META[previewQuadrant].hint}
           </p>
@@ -287,7 +296,13 @@ export default function Board() {
         </form>
 
         <section className={s.matrixWrap} aria-label="Task matrix">
-          <Matrix tasks={open} now={now} justAdded={justAdded} onToggle={toggleDone} />
+          <Matrix
+            tasks={open}
+            now={now}
+            justAdded={justAdded}
+            landing={landing}
+            onToggle={toggleDone}
+          />
         </section>
       </main>
 
@@ -590,11 +605,13 @@ function Matrix({
   tasks,
   now,
   justAdded,
+  landing,
   onToggle,
 }: {
   tasks: Task[];
   now: number;
   justAdded: string | null;
+  landing: boolean;
   onToggle: (id: string) => void;
 }) {
   const byCell = useMemo(() => {
@@ -643,8 +660,9 @@ function Matrix({
                     <button
                       key={t.id}
                       className={`${s.chip} ${s[`chip_${t.domain}`]} ${
-                        t.id === justAdded ? s.chipNew : ""
+                        t.id === justAdded ? s.chipNew : landing ? s.chipLand : ""
                       } ${stale ? s.chipStale : ""} ${t.today ? s.chipToday : ""}`}
+                      style={landing ? { animationDelay: `${Math.min(rank * 40, 320)}ms` } : undefined}
                       title={`${rank}. ${t.title} (${DOMAIN_WORD[t.domain]}${
                         stale ? `, ${ageInDays(t, now)} days old` : ""
                       }). Click to mark done.`}
@@ -725,7 +743,16 @@ function Row({
       >
         {task.done && (
           <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden>
-            <path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              className={s.checkMark}
+              d="M3 8.5l3 3 7-7"
+              pathLength={1}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         )}
       </button>

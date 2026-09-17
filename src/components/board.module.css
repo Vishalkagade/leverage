@@ -16,6 +16,25 @@
   border-bottom: 2px solid var(--ink);
 }
 
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo {
+  flex: none;
+  width: clamp(31px, 5vw, 54px);
+  height: auto;
+  color: var(--ink);
+  margin-top: 2px;
+}
+
+.logoWin {
+  transform-origin: 9.25px 9.25px;
+  animation: land 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s backwards;
+}
+
 .wordmark {
   margin: 0;
   font-size: clamp(44px, 7vw, 76px);
@@ -135,6 +154,7 @@
 }
 
 .suggest {
+  animation: settle 0.24s cubic-bezier(0.16, 1, 0.3, 1);
   margin-top: 14px;
   padding: 14px 16px;
   border-radius: var(--radius-m);
@@ -258,6 +278,7 @@
 }
 
 .todayItem {
+  animation: settle 0.26s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -452,6 +473,21 @@
   color: var(--ink);
 }
 
+.level:active,
+.domainBtn:active,
+.todayBtn:active:not(:disabled),
+.energyBtn:active {
+  transform: scale(0.96);
+}
+
+.level,
+.domainBtn,
+.todayBtn,
+.energyBtn {
+  transition-property: background, border-color, color, transform;
+  transition-duration: 0.12s;
+}
+
 .levelBelow {
   background: var(--chalk-deep);
   border-color: var(--chalk-deep);
@@ -478,7 +514,7 @@
   color: var(--ink-soft);
   border: 1px solid var(--line);
   background: var(--paper);
-  transition: background 0.15s, border-color 0.15s;
+  animation: settle 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .preview strong {
@@ -763,6 +799,10 @@
   animation: pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 
+.chipLand {
+  animation: land 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
 @keyframes pop {
   0% {
     transform: scale(0.6);
@@ -771,6 +811,37 @@
   100% {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+@keyframes land {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes settle {
+  0% {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes draw {
+  0% {
+    stroke-dashoffset: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
   }
 }
 
@@ -853,6 +924,11 @@
 .checkOn,
 .checkOn:hover {
   background: var(--ink);
+}
+
+.checkMark {
+  stroke-dasharray: 1;
+  animation: draw 0.18s ease-out;
 }
 
 .rowMain {
