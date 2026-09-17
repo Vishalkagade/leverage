@@ -4,11 +4,11 @@
   --paper: #f7f8f4;
   --ink: #1f2a24;
   --ink-soft: #55615a;
-  --ink-faint: #9aa39d;
+  --ink-faint: #616c65;
   --line: #c9cfc6;
   --work: #2f4bc9;
   --work-soft: #dfe4fa;
-  --home: #3e8e5f;
+  --home: #2b724a;
   --home-soft: #dcefe3;
   --win: #f2c94c;
   --win-soft: #fbf0c8;
@@ -36,7 +36,18 @@ body {
   overflow-x: hidden;
 }
 
+html {
+  scrollbar-color: var(--line) transparent;
+}
+
+::selection {
+  background: var(--win);
+  color: var(--ink);
+}
+
 body {
+  caret-color: var(--ink);
+  accent-color: var(--ink);
   background: var(--chalk);
   color: var(--ink);
   font-family: var(--font);

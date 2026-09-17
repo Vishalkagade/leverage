@@ -164,11 +164,9 @@ export default function Board() {
     setTasks((prev) => prev.filter((t) => !t.done));
   }
 
-  const today = new Date().toLocaleDateString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
+  const today = now
+    ? new Date(now).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })
+    : "";
 
   return (
     <div className={s.page}>
@@ -733,7 +731,10 @@ function Row({
       </button>
       <span className={s.rowMain}>
         <span className={s.rowTitleLine}>
-          <span className={s.rowTitle}>{task.title}</span>
+          <span className={`${s.rowDot} ${s[`rowDot_${task.domain}`]}`} aria-hidden />
+          <span className={s.rowTitle} title={task.title}>
+            {task.title}
+          </span>
           {!task.done && age >= 1 && (
             <span className={`${s.age} ${stale ? s.ageStale : ""}`} title={`Added ${age} days ago`}>
               {age}d
