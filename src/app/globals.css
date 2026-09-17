@@ -1,21 +1,25 @@
 :root {
-  --bg: #ffffff;
-  --surface: #fafafa;
-  --surface-2: #f4f4f5;
-  --line: #e4e4e7;
-  --line-strong: #d4d4d8;
-  --ink: #18181b;
-  --ink-soft: #52525b;
-  --ink-faint: #a1a1aa;
-  --work: #2563eb;
-  --home: #059669;
-  --warn: #b45309;
+  --chalk: #eef0ea;
+  --chalk-deep: #e2e5dd;
+  --paper: #f7f8f4;
+  --ink: #1f2a24;
+  --ink-soft: #55615a;
+  --ink-faint: #9aa39d;
+  --line: #c9cfc6;
+  --work: #2f4bc9;
+  --work-soft: #dfe4fa;
+  --home: #3e8e5f;
+  --home-soft: #dcefe3;
+  --win: #f2c94c;
+  --win-soft: #fbf0c8;
+  --sink: #d8dad2;
 
-  --radius: 6px;
-  --radius-l: 10px;
+  --radius-s: 4px;
+  --radius-m: 10px;
+  --radius-l: 18px;
   --gutter: 20px;
 
-  --font: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font: var(--font-display), "Helvetica Neue", Arial, sans-serif;
 }
 
 *,
@@ -33,12 +37,13 @@ body {
 }
 
 body {
-  background: var(--bg);
+  background: var(--chalk);
   color: var(--ink);
   font-family: var(--font);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 16px;
+  line-height: 1.45;
   -webkit-font-smoothing: antialiased;
+  font-variation-settings: "opsz" 14, "wdth" 100;
 }
 
 button,

@@ -781,10 +781,8 @@ function Row({
       )}
       <span className={`${s.pill} ${s[`pill_${task.domain}`]}`}>{DOMAIN_WORD[task.domain]}</span>
       <span className={s.meters}>
-        <span title={`Difficulty: ${DIFFICULTY_WORDS[task.difficulty]}`}>
-          Effort {task.difficulty}
-        </span>
-        <span title={`Impact: ${IMPACT_WORDS[task.impact]}`}>Impact {task.impact}</span>
+        <Meter label="Difficulty" value={task.difficulty} word={DIFFICULTY_WORDS[task.difficulty]} />
+        <Meter label="Impact" value={task.impact} word={IMPACT_WORDS[task.impact]} />
       </span>
       <span className={`${s.qTag} ${s[`q_${q}`]}`}>{QUADRANT_META[q].name}</span>
       <button className={s.remove} onClick={() => onRemove(task.id)} aria-label={`Delete ${task.title}`}>
@@ -802,3 +800,12 @@ function Arrow() {
   );
 }
 
+function Meter({ label, value, word }: { label: string; value: Level; word: string }) {
+  return (
+    <span className={s.meter} title={`${label}: ${word}`} aria-label={`${label} ${word}`}>
+      {LEVELS.map((l) => (
+        <i key={l} className={`${s.block} ${l <= value ? s.blockOn : ""}`} />
+      ))}
+    </span>
+  );
+}
