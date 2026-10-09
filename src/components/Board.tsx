@@ -185,7 +185,17 @@ export default function Board() {
           <p className={s.tagline}>What to do next, by effort and payoff.</p>
         </div>
         <div className={s.headerRight}>
-          <span className={s.date}>{today}</span>
+          <div className={s.headerTop}>
+            <span className={s.date}>{today}</span>
+            <button
+              className={s.notesBtn}
+              onClick={() =>
+                window.open("/notes", "leverage-notes", "popup,width=560,height=680")
+              }
+            >
+              Notes
+            </button>
+          </div>
           <div className={s.segment} role="tablist" aria-label="Show tasks from">
             {(["all", "work", "home"] as Filter[]).map((f) => (
               <button
