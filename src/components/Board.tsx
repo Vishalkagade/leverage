@@ -26,9 +26,11 @@ import {
   type Task,
 } from "@/lib/tasks";
 import Logo from "./Logo";
+import Notes from "./Notes";
 import s from "./board.module.css";
 
 type Filter = "all" | Domain;
+type View = "board" | "notes";
 
 const DOMAIN_WORD: Record<Domain, string> = { work: "Work", home: "Home" };
 
@@ -37,6 +39,7 @@ export default function Board() {
   const [dropped, setDropped] = useState<Dropped[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [now, setNow] = useState(0);
+  const [view, setView] = useState<View>("board");
   const [filter, setFilter] = useState<Filter>("all");
   const [showDone, setShowDone] = useState(false);
   const [justAdded, setJustAdded] = useState<string | null>(null);
@@ -187,15 +190,21 @@ export default function Board() {
         <div className={s.headerRight}>
           <div className={s.headerTop}>
             <span className={s.date}>{today}</span>
-            <button
-              className={s.notesBtn}
-              onClick={() =>
-                window.open("/notes", "leverage-notes", "popup,width=560,height=680")
-              }
-            >
-              Notes
-            </button>
+            <div className={s.segment} role="tablist" aria-label="View">
+              {(["board", "notes"] as View[]).map((v) => (
+                <button
+                  key={v}
+                  role="tab"
+                  aria-selected={view === v}
+                  className={`${s.segmentBtn} ${view === v ? s.segmentOn : ""}`}
+                  onClick={() => setView(v)}
+                >
+                  {v === "board" ? "Board" : "Notes"}
+                </button>
+              ))}
+            </div>
           </div>
+          {view === "board" && (
           <div className={s.segment} role="tablist" aria-label="Show tasks from">
             {(["all", "work", "home"] as Filter[]).map((f) => (
               <button
@@ -212,9 +221,14 @@ export default function Board() {
               </button>
             ))}
           </div>
+          )}
         </div>
       </header>
 
+      {view === "notes" ? (
+        <Notes />
+      ) : (
+      <>
       {hydrated && (
         <TodayStrip
           chosen={todayTasks}
@@ -385,6 +399,8 @@ export default function Board() {
       </section>
 
       {hydrated && <WeekReview tasks={tasks} dropped={dropped} now={now} />}
+      </>
+      )}
     </div>
   );
 }

@@ -1,9 +1,10 @@
 .page {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
-  padding: 12px;
-  gap: 12px;
+  height: calc(100dvh - 200px);
+  min-height: 420px;
+  padding-top: 24px;
+  gap: 16px;
 }
 
 .toolbar {
