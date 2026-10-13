@@ -11,7 +11,7 @@ const bricolage = Bricolage_Grotesque({
 
 export const metadata: Metadata = {
   title: "Leverage",
-  description: "A small board for deciding what to do next, by difficulty and impact.",
+  description: "A small notes app. Everything is saved in your browser.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

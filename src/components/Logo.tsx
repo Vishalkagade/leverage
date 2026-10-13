@@ -1,4 +1,4 @@
-import s from "./board.module.css";
+import s from "./shell.module.css";
 
 /** The matrix as a mark: four cells, quick wins filled. */
 export default function Logo({ size = 44 }: { size?: number }) {

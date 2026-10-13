@@ -1,23 +1,17 @@
 # Leverage
 
-A small personal board for deciding what to do next. Every task gets three things:
+A small personal notes app. One screen: a list of saved notes on the left, the note you are
+writing on the right.
 
-1. **Where it belongs** — Work or Home.
-2. **How hard it is** — 1 (trivial) to 5 (brutal).
-3. **How much it matters** — 1 (minor) to 5 (huge).
+- **Write** in a plain text pad. Pick a font (Bricolage, Lora, Mono, Handwritten), a size, a
+  text colour and a paper colour per note.
+- **Save** with the Save button or Ctrl/Cmd+S. Nothing is stored until you save, and the
+  app warns you before you leave a note with unsaved changes.
+- **Reopen** any saved note from the list. The first line of the note is its title.
+- **Delete** a saved note from the toolbar.
 
-Tasks land on a difficulty × impact matrix, and the list below the matrix sorts them by
-leverage (impact × 2 − difficulty) so the highest payoff for the least effort comes first.
-Everything is stored in your browser's localStorage; there is no backend.
-
-On top of that:
-
-- **Today** — pick up to three tasks for the day. "What now?" suggests one based on your
-  energy (low: easy things first; high: big bets in the morning, then whatever matters most).
-- **Age** — tasks show how many days they have been open; after a week they fade on the matrix.
-- **First step** — hard tasks (4 or 5) ask for a first small step, shown wherever the task appears.
-- **This week** — what you finished in the last seven days, the Work/Home balance, and how many
-  time sinks you dropped.
+Everything is stored in your browser's localStorage under a versioned key. There is no
+backend and no account, so notes stay on the device and browser you wrote them in.
 
 ## Run locally
 

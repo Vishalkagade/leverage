@@ -8,15 +8,15 @@ web
 
 ## Users
 
-One person: the owner, a graduate student at Hochschule Ansbach who also runs a household. They use Leverage alone. The main moment is morning planning at the laptop: open the board, choose up to three tasks for the day, close it. Phone use is secondary and mostly for reading the list.
+One person: the owner, a graduate student at Hochschule Ansbach who also runs a household. They use Leverage alone, mostly at the laptop, to write things down and come back to them later. Phone use is secondary and mostly for reading a saved note.
 
 ## Product Purpose
 
-Leverage decides what to do next. Every task carries three facts: where it belongs (Work or Home), how hard it is (1 to 5), and how much it matters (1 to 5). The board places tasks on a difficulty-by-impact matrix and lists them in leverage order, so cheap high-payoff work surfaces first and hard low-payoff work is exposed as a time sink. Success is a short, honest daily list and fewer stale tasks.
+Leverage is a place to write notes and keep them. One screen: saved notes on the left, the note being written on the right. Each note carries its own font, size, text colour and paper colour. Saving is explicit (Save button or Ctrl/Cmd+S); the app never writes a note to storage until the owner asks, and warns before unsaved changes are lost. Success is that the owner trusts the app with a thought and finds it again later.
 
 ## Positioning
 
-Most to-do apps sort by date or by a single priority flag. Leverage refuses to store a due date or a priority. It forces two separate judgements, effort and payoff, and derives the order from them. The four quadrants (Quick wins, Big bets, Fill-ins, Time sinks) are the product's vocabulary, and the daily limit of three is a deliberate constraint, not a setting.
+The productivity board, task matrix and tracker that Leverage started as were removed in October 2026. What remains is deliberately small: no tags, folders, sync, or rich text. The name Leverage stays.
 
 ## Operating Context
 
@@ -29,41 +29,37 @@ Most to-do apps sort by date or by a single priority flag. Leverage refuses to s
 
 Confirmed functionality:
 
-- Add a task with domain, title, difficulty, impact. Hard tasks (4 or 5) ask for a first small step.
-- Matrix view (5 by 5) with the four quadrants, chips coloured by domain, numbered chips on phone width.
-- Ordered list by leverage score (impact times two minus difficulty), with age in days and a stale marker after seven days.
-- Today: up to three chosen tasks, with a "What now?" suggester driven by a Low or High energy choice and the time of day.
-- Done list, clear done, delete. Deleting an open time sink is recorded as "dropped".
-- Weekly summary: done count and Work/Home split, quick wins and big bets finished, time sinks dropped.
-- Filter by Everything, Work, Home.
+- Write a note in a plain text pad. Choose font (Bricolage, Lora, Mono, Handwritten), size, text colour and paper colour, including a custom colour.
+- Save explicitly with the Save button or Ctrl/Cmd+S. Status text shows "Unsaved changes", "Saved", or when the note was last saved.
+- Saved notes list, newest first, titled by the first line of the note. Open, create new, delete.
+- Warning before leaving a note (switching, creating new, closing the tab) with unsaved changes.
+- Notes from the earlier single-note version are carried over on first load.
 
-Terminology to keep: Work, Home, Quick wins, Big bets, Fill-ins, Time sinks, Today, What now?, first step, leverage.
+Terminology to keep: Notes, Save, New note, Unsaved changes.
 
 Constraints:
 
-- Single device. Cross-device sync is an open decision, explicitly deferred. If added later it implies a database and a simple sign-in.
-- No streaks, points, or badges. Rewarding volume works against the purpose.
+- Single device. Data lives in the browser's localStorage under a versioned key. Cross-device sync is deferred; if added later it implies a database and a simple sign-in.
 - One screen. No modals or extra pages unless a feature genuinely needs them.
-- Difficulty and impact stay on a 1 to 5 scale with the named levels (Trivial to Brutal, Minor to Huge).
+- No task lists, trackers, streaks, or reminders. Those were removed on purpose.
 
 ## Brand Commitments
 
-- Name: Leverage. Tagline in use: "What to do next, by effort and payoff."
-- Voice: plain, second person, sentence case. Controls name their action ("Add task", "Do this today", "Clear done"). No motivational copy.
-- Binding visual constraint volunteered by the owner: the current chalk-green world with Bricolage Grotesque, the yellow quick-wins quadrant, hatched time sinks, and solid cobalt and moss chips. A neutral white and grey restyle was tried and rejected as less liked. Future refinement preserves this world.
+- Name: Leverage. Tagline in use: "Write it down. Keep it."
+- Voice: plain, second person, sentence case. Controls name their action ("Save", "New note", "Delete"). No motivational copy.
+- Binding visual constraint volunteered by the owner: the current chalk-green world with Bricolage Grotesque, the yellow-filled cell in the logo mark, and the cobalt and moss accent colours. A neutral white and grey restyle was tried and rejected as less liked. Future refinement preserves this world.
 
 ## Evidence on Hand
 
-- The working application in `src/`, with the task model and scoring in `src/lib/tasks.ts`.
-- No real user data beyond the owner's own board. No testimonials, metrics, or comparisons exist and none should be invented.
+- The working application in `src/`, with note storage in `src/components/Notes.tsx`.
+- No real user data beyond the owner's own notes. No testimonials, metrics, or comparisons exist and none should be invented.
 
 ## Product Principles
 
-1. Two judgements, one order. The user rates effort and payoff; the product decides the sequence. Never ask for a priority or a due date.
-2. Three is the limit. The daily list holds at most three tasks. Fewer is better, and the interface says so.
-3. Expose the sinks. Hard, low-payoff work is shown plainly so it can be dropped, and dropping counts as progress.
-4. Capture fast, decide once. Adding a task takes seconds; the morning decision is the only ritual.
-5. Owner's tool. Optimise for the one person who uses it every day, not for a hypothetical newcomer.
+1. Nothing is saved until you say so. Saving is a deliberate act, and the interface always says whether the open note is saved.
+2. The note owns its look. Font and colours belong to each note, not to the app, so a note looks the way it did when it was written.
+3. One screen, no ceremony. Open the app and start typing. No folders, tags, or setup.
+4. Owner's tool. Optimise for the one person who uses it every day, not for a hypothetical newcomer.
 
 ## Accessibility & Inclusion
 

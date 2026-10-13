@@ -1,5 +1,5 @@
-import Board from "@/components/Board";
+import Shell from "@/components/Shell";
 
 export default function Page() {
-  return <Board />;
+  return <Shell />;
 }
