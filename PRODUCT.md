@@ -12,11 +12,11 @@ One person: the owner, a graduate student at Hochschule Ansbach who also runs a 
 
 ## Product Purpose
 
-Leverage is a place to write notes and keep them. One screen: saved notes on the left, the note being written on the right. Each note carries its own font, size, text colour and paper colour. Saving is explicit (Save button or Ctrl/Cmd+S); the app never writes a note to storage until the owner asks, and warns before unsaved changes are lost. Success is that the owner trusts the app with a thought and finds it again later.
+Leverage is a place to write notes and keep them. One screen: saved notes on the left, the note being written on the right. Each note carries its own font, size, text colour and paper colour, and can hold highlighted text and simple tables. Saving is explicit (Save button or Ctrl/Cmd+S); the app never writes a note to storage until the owner asks, and warns before unsaved changes are lost. Success is that the owner trusts the app with a thought and finds it again later.
 
 ## Positioning
 
-The productivity board, task matrix and tracker that Leverage started as were removed in October 2026. What remains is deliberately small: no tags, folders, sync, or rich text. The name Leverage stays.
+The productivity board, task matrix and tracker that Leverage started as were removed in October 2026. What remains is deliberately small: no tags, folders, or sync. Formatting is limited to a highlighter and plain tables, added October 2026; there is no bold, italic, headings, lists, links or images. The name Leverage stays.
 
 ## Operating Context
 
@@ -29,7 +29,10 @@ The productivity board, task matrix and tracker that Leverage started as were re
 
 Confirmed functionality:
 
-- Write a note in a plain text pad. Choose font (Bricolage, Lora, Mono, Handwritten), size, text colour and paper colour, including a custom colour.
+- Write a note in a pad. Choose font (Bricolage, Lora, Mono, Handwritten), size, text colour and paper colour, including a custom colour.
+- Highlight selected text (toolbar button or Ctrl/Cmd+Shift+H); pressing again with the caret in a highlight removes it.
+- Insert a table from the toolbar. Tab moves between cells and adds a row from the last cell. With the caret in a table the toolbar offers add row, add column, remove table.
+- Pasting always inserts plain text. Notes are stored as a small fixed set of HTML (lines, highlights, tables) with a plain-text mirror for titles and search.
 - Save explicitly with the Save button or Ctrl/Cmd+S. Status text shows "Unsaved changes", "Saved", or when the note was last saved.
 - Saved notes list, newest first, titled by the first line of the note. Open, create new, delete.
 - Search box above the list filters notes by any text they contain. Escape clears it.
@@ -44,6 +47,7 @@ Constraints:
 - Single device. Data lives in the browser's localStorage under a versioned key. Cross-device sync is deferred; if added later it implies a database and a simple sign-in.
 - One screen. No modals or extra pages unless a feature genuinely needs them.
 - No task lists, trackers, streaks, or reminders. Those were removed on purpose.
+- No further formatting beyond highlight and tables. Anything pasted is reduced to plain text.
 
 ## Brand Commitments
 

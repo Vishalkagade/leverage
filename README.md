@@ -9,6 +9,10 @@ writing on the right.
   app warns you before you leave a note with unsaved changes.
 - **Reopen** any saved note from the list. The first line of the note is its title.
 - **Delete** a saved note from the toolbar.
+- **Highlight** selected text from the toolbar or with Ctrl/Cmd+Shift+H. Press again inside a
+  highlight to remove it.
+- **Tables.** Insert one from the toolbar; Tab moves between cells and adds a row at the end.
+  With the caret in a table you can add a row or column, or remove the table.
 - **Search** the list by any text a note contains.
 - **Never lose a draft.** What you are typing is kept in the browser as you go, and comes back
   on the next visit marked "Restored unsaved changes". It only becomes a saved note when you press Save.
