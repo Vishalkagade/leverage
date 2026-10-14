@@ -269,3 +269,19 @@
     min-height: 60dvh;
   }
 }
+
+.search {
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  padding: 7px 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.search::placeholder {
+  color: var(--ink-faint);
+}

@@ -22,6 +22,9 @@ const PAPERS = ["#f7f8f4", "#fbf0c8", "#dfe4fa", "#dcefe3", "#1f2a24"];
 
 const STORAGE_KEY = "leverage.notes.v2";
 const LEGACY_KEY = "leverage.notes.v1";
+// Work in progress, written on every change so a closed tab or crash loses nothing.
+// The real save (Save button, Ctrl/Cmd+S) still writes to STORAGE_KEY only.
+const DRAFT_KEY = "leverage.draft.v1";
 
 type Style = { font: FontId; ink: string; paper: string; size: number };
 type Draft = Style & { text: string };
@@ -57,6 +60,31 @@ function persist(notes: Note[]) {
   } catch {}
 }
 
+type StoredDraft = { current: string | null; draft: Draft };
+
+function loadDraft(): StoredDraft | null {
+  try {
+    const raw = window.localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<StoredDraft>;
+    if (!parsed.draft || typeof parsed.draft.text !== "string") return null;
+    return { current: parsed.current ?? null, draft: { ...EMPTY, ...parsed.draft } };
+  } catch {
+    return null;
+  }
+}
+
+function persistDraft(value: StoredDraft | null) {
+  try {
+    if (value) window.localStorage.setItem(DRAFT_KEY, JSON.stringify(value));
+    else window.localStorage.removeItem(DRAFT_KEY);
+  } catch {}
+}
+
+function matches(n: Note, q: string) {
+  return n.text.toLowerCase().includes(q);
+}
+
 function titleOf(text: string) {
   const line = text.split("\n").find((l) => l.trim());
   return line ? line.trim().slice(0, 60) : "Untitled";
@@ -89,11 +117,20 @@ export default function Notes() {
   const [hydrated, setHydrated] = useState(false);
   const [now, setNow] = useState(0);
   const [flash, setFlash] = useState(false);
+  const [restored, setRestored] = useState(false);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const loaded = loadNotes();
     setNotes(loaded);
-    if (loaded[0]) {
+    const kept = loadDraft();
+    const target = kept && (kept.current === null || loaded.some((n) => n.id === kept.current)) ? kept : null;
+    if (target) {
+      // Pick up where the last session left off, unsaved.
+      setCurrent(target.current);
+      setDraft(target.draft);
+      setRestored(true);
+    } else if (loaded[0]) {
       setCurrent(loaded[0].id);
       setDraft(loaded[0]);
     }
@@ -104,8 +141,16 @@ export default function Notes() {
   }, []);
 
   const sorted = useMemo(() => [...notes].sort((a, b) => b.updatedAt - a.updatedAt), [notes]);
+  const q = query.trim().toLowerCase();
+  const visible = useMemo(() => (q ? sorted.filter((n) => matches(n, q)) : sorted), [sorted, q]);
   const saved = useMemo(() => notes.find((n) => n.id === current) ?? null, [notes, current]);
   const dirty = saved ? !sameDraft(saved, draft) : draft.text.trim().length > 0;
+
+  // Mirror unsaved work to its own key; drop it once the note matches what is saved.
+  useEffect(() => {
+    if (!hydrated) return;
+    persistDraft(dirty ? { current, draft } : null);
+  }, [hydrated, dirty, current, draft]);
 
   const save = useCallback(() => {
     if (!dirty) return;
@@ -124,6 +169,7 @@ export default function Notes() {
     });
     setNow(t);
     setFlash(true);
+    setRestored(false);
   }, [dirty, saved, draft]);
 
   useEffect(() => {
@@ -159,12 +205,14 @@ export default function Notes() {
   function openNote(n: Note) {
     if (n.id === current) return;
     if (!confirmLeave()) return;
+    setRestored(false);
     setCurrent(n.id);
     setDraft(n);
   }
 
   function newNote() {
     if (!confirmLeave()) return;
+    setRestored(false);
     setCurrent(null);
     setDraft({ ...draft, text: "" });
   }
@@ -175,12 +223,16 @@ export default function Notes() {
     const next = notes.filter((n) => n.id !== saved.id);
     persist(next);
     setNotes(next);
+    setRestored(false);
     const nextOpen = [...next].sort((a, b) => b.updatedAt - a.updatedAt)[0];
     setCurrent(nextOpen?.id ?? null);
     setDraft(nextOpen ?? { ...draft, text: "" });
   }
 
-  const set = (patch: Partial<Draft>) => setDraft((d) => ({ ...d, ...patch }));
+  const set = (patch: Partial<Draft>) => {
+    setRestored(false);
+    setDraft((d) => ({ ...d, ...patch }));
+  };
   const family = FONTS.find((f) => f.id === draft.font)?.family ?? FONTS[0].family;
 
   const status = !hydrated
@@ -188,9 +240,11 @@ export default function Notes() {
     : flash
       ? "Saved"
       : dirty
-        ? saved
-          ? "Unsaved changes"
-          : "Not saved yet"
+        ? restored
+          ? "Restored unsaved changes"
+          : saved
+            ? "Unsaved changes"
+            : "Not saved yet"
         : saved
           ? `Saved ${when(saved.updatedAt, now)}`
           : "New note";
@@ -204,11 +258,26 @@ export default function Notes() {
             New note
           </button>
         </div>
+        {hydrated && sorted.length > 0 && (
+          <input
+            type="search"
+            className={s.search}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setQuery("");
+            }}
+            placeholder="Search notes"
+            aria-label="Search notes"
+          />
+        )}
         {hydrated && sorted.length === 0 ? (
           <p className={s.empty}>Nothing saved yet. Write something and press Save.</p>
+        ) : hydrated && visible.length === 0 ? (
+          <p className={s.empty}>No notes match “{query.trim()}”.</p>
         ) : (
           <ul className={s.list}>
-            {sorted.map((n) => (
+            {visible.map((n) => (
               <li key={n.id}>
                 <button
                   className={`${s.item} ${n.id === current ? s.itemOn : ""}`}

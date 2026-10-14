@@ -9,6 +9,9 @@ writing on the right.
   app warns you before you leave a note with unsaved changes.
 - **Reopen** any saved note from the list. The first line of the note is its title.
 - **Delete** a saved note from the toolbar.
+- **Search** the list by any text a note contains.
+- **Never lose a draft.** What you are typing is kept in the browser as you go, and comes back
+  on the next visit marked "Restored unsaved changes". It only becomes a saved note when you press Save.
 
 Everything is stored in your browser's localStorage under a versioned key. There is no
 backend and no account, so notes stay on the device and browser you wrote them in.

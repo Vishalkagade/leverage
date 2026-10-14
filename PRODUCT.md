@@ -32,6 +32,8 @@ Confirmed functionality:
 - Write a note in a plain text pad. Choose font (Bricolage, Lora, Mono, Handwritten), size, text colour and paper colour, including a custom colour.
 - Save explicitly with the Save button or Ctrl/Cmd+S. Status text shows "Unsaved changes", "Saved", or when the note was last saved.
 - Saved notes list, newest first, titled by the first line of the note. Open, create new, delete.
+- Search box above the list filters notes by any text they contain. Escape clears it.
+- Unsaved work is mirrored to a separate draft key on every change and restored on the next load, marked "Restored unsaved changes". Saving still happens only on request.
 - Warning before leaving a note (switching, creating new, closing the tab) with unsaved changes.
 - Notes from the earlier single-note version are carried over on first load.
 
