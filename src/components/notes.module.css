@@ -292,6 +292,11 @@
   pointer-events: none;
 }
 
+.padPen {
+  cursor: crosshair;
+  border-color: var(--ink);
+}
+
 .pad mark {
   background: var(--hl, rgba(255, 221, 87, 0.85));
   color: inherit;

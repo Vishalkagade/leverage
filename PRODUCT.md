@@ -30,7 +30,7 @@ The productivity board, task matrix and tracker that Leverage started as were re
 Confirmed functionality:
 
 - Write a note in a pad. Choose font (Bricolage, Lora, Mono, Handwritten), size, text colour and paper colour, including a custom colour.
-- Highlight selected text (toolbar button or Ctrl/Cmd+Shift+H); pressing again with the caret in a highlight removes it.
+- Highlighter and Eraser modes in the toolbar (Ctrl/Cmd+Shift+H toggles the highlighter). With a mode on, dragging over text marks or clears it; passing the highlighter over marked text leaves it as is. Switching a mode on applies it to any text already selected. One highlight colour, softer on dark paper.
 - Insert a table from the toolbar. Tab moves between cells and adds a row from the last cell. With the caret in a table the toolbar offers add row, add column, remove table.
 - Pasting always inserts plain text. Notes are stored as a small fixed set of HTML (lines, highlights, tables) with a plain-text mirror for titles and search.
 - Save explicitly with the Save button or Ctrl/Cmd+S. Status text shows "Unsaved changes", "Saved", or when the note was last saved.

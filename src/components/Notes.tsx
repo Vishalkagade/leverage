@@ -176,6 +176,76 @@ function tableHtml(cols = 3, rows = 3) {
   return `<table><thead>${row("th")}</thead><tbody>${body}</tbody></table><div><br></div>`;
 }
 
+type Pen = "mark" | "erase" | null;
+
+function unwrap(el: Element) {
+  el.replaceWith(...Array.from(el.childNodes));
+}
+
+// Split a highlight so that `t` is its only child, moving the siblings before
+// and after `t` into their own highlights.
+function isolate(m: Element, t: Node) {
+  const before = document.createElement("mark");
+  const after = document.createElement("mark");
+  let n = m.firstChild;
+  while (n && n !== t) {
+    const next = n.nextSibling;
+    before.append(n);
+    n = next;
+  }
+  n = t.nextSibling;
+  while (n) {
+    const next = n.nextSibling;
+    after.append(n);
+    n = next;
+  }
+  if (before.hasChildNodes()) m.before(before);
+  if (after.hasChildNodes()) m.after(after);
+}
+
+// Pass the marker (or eraser) over a range. Marking wraps bare text and leaves
+// text that is already highlighted alone; erasing removes highlights.
+function strokeRange(pad: HTMLElement, range: Range, pen: Pen) {
+  const sc = range.startContainer, so = range.startOffset;
+  const ec = range.endContainer, eo = range.endOffset;
+  if (ec.nodeType === Node.TEXT_NODE && eo < (ec as Text).length) (ec as Text).splitText(eo);
+  if (sc.nodeType === Node.TEXT_NODE && so > 0) {
+    const rest = (sc as Text).splitText(so);
+    range.setStart(rest, 0);
+    if (ec === sc) range.setEnd(rest, rest.length);
+  }
+  const walker = document.createTreeWalker(pad, NodeFilter.SHOW_TEXT);
+  const texts: Text[] = [];
+  while (walker.nextNode()) {
+    const n = walker.currentNode as Text;
+    if (n.length > 0 && range.intersectsNode(n)) texts.push(n);
+  }
+  for (const text of texts) {
+    const m = text.parentElement?.closest("mark");
+    const marked = !!m && pad.contains(m);
+    if (pen === "mark" && !marked) {
+      const mark = document.createElement("mark");
+      text.replaceWith(mark);
+      mark.append(text);
+    } else if (pen === "erase" && marked) {
+      if (text.parentNode === m && m.childNodes.length > 1) isolate(m, text);
+      if (text.parentNode === m) unwrap(m);
+    }
+  }
+  // Merge touching highlights so runs stay seamless.
+  for (const m of Array.from(pad.querySelectorAll("mark"))) {
+    let next = m.nextSibling;
+    while (next && next.nodeType === Node.ELEMENT_NODE && (next as Element).tagName === "MARK") {
+      m.append(...Array.from(next.childNodes));
+      const gone = next as Element;
+      next = next.nextSibling;
+      gone.remove();
+    }
+    if (!m.hasChildNodes()) m.remove();
+  }
+  pad.normalize();
+}
+
 function when(ts: number, now: number) {
   const mins = Math.round((now - ts) / 60_000);
   if (mins < 1) return "just now";
@@ -197,7 +267,9 @@ export default function Notes() {
   const [query, setQuery] = useState("");
   // Bumped whenever a different note (or a restored draft) is loaded into the pad.
   const [loadKey, setLoadKey] = useState(0);
-  const [caret, setCaret] = useState({ inMark: false, inTable: false });
+  const [inTable, setInTable] = useState(false);
+  // Highlighter or eraser mode: while on, any text you drag over is marked or cleared.
+  const [pen, setPen] = useState<Pen>(null);
 
   const padRef = useRef<HTMLDivElement>(null);
   const draftRef = useRef(draft);
@@ -288,64 +360,45 @@ export default function Notes() {
     [],
   );
 
-  // Track whether the caret sits in a highlight or a table, for the toolbar.
+  // Track whether the caret sits in a table, for the toolbar.
   useEffect(() => {
     const onSel = () => {
       const sel = window.getSelection();
       const node = sel?.anchorNode ?? null;
-      if (!inPad(node)) return setCaret({ inMark: false, inTable: false });
-      const el = elementAt(node);
-      setCaret({ inMark: !!el?.closest("mark"), inTable: !!el?.closest("table") });
+      if (!inPad(node)) return setInTable(false);
+      setInTable(!!elementAt(node)?.closest("table"));
     };
     document.addEventListener("selectionchange", onSel);
     return () => document.removeEventListener("selectionchange", onSel);
   }, [inPad, elementAt]);
 
-  const toggleHighlight = useCallback(() => {
-    const pad = padRef.current;
-    const sel = window.getSelection();
-    if (!pad || !sel || sel.rangeCount === 0 || !inPad(sel.anchorNode)) return;
-    const range = sel.getRangeAt(0);
-    const mark = elementAt(sel.anchorNode)?.closest("mark");
-    if (mark) {
-      // Removing. Widen the range so any highlight touching either end is
-      // included whole, then unwrap every highlight it covers. This is done
-      // directly on the DOM: the browser's own replace would keep the empty
-      // <mark> at the caret and put the text straight back inside it.
-      if (range.collapsed) range.selectNode(mark);
-      const startMark = elementAt(range.startContainer)?.closest("mark");
-      const endMark = elementAt(range.endContainer)?.closest("mark");
-      if (startMark) range.setStartBefore(startMark);
-      if (endMark) range.setEndAfter(endMark);
-      for (const m of Array.from(pad.querySelectorAll("mark"))) {
-        if (range.intersectsNode(m)) m.replaceWith(...Array.from(m.childNodes));
-      }
-      pad.normalize();
-      sel.removeAllRanges();
-      sel.addRange(range);
-      pad.focus();
+  // Apply the pen to whatever is selected in the pad, then drop the selection.
+  const stroke = useCallback(
+    (mode: Pen) => {
+      const pad = padRef.current;
+      const sel = window.getSelection();
+      if (!mode || !pad || !sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+      const range = sel.getRangeAt(0);
+      if (!inPad(range.startContainer) || !inPad(range.endContainer)) return;
+      strokeRange(pad, range, mode);
+      sel.collapseToEnd();
       commit();
-      return;
-    }
-    if (range.collapsed) return;
-    // Adding: wrap each selected text run in <mark> and insert it in place of
-    // the selection. insertHTML keeps the change in the browser's undo history.
-    const frag = range.cloneContents();
-    const walker = document.createTreeWalker(frag, NodeFilter.SHOW_TEXT);
-    const texts: Text[] = [];
-    while (walker.nextNode()) texts.push(walker.currentNode as Text);
-    for (const t of texts) {
-      if (t.parentElement?.closest("mark")) continue;
-      const m = document.createElement("mark");
-      t.replaceWith(m);
-      m.append(t);
-    }
-    sel.removeAllRanges();
-    sel.addRange(range);
-    pad.focus();
-    document.execCommand("insertHTML", false, serialize(frag));
-    commit();
-  }, [inPad, elementAt, commit]);
+    },
+    [inPad, commit],
+  );
+
+  // Called when a drag or shift-selection ends while a pen is on.
+  const strokeEnd = useCallback(() => stroke(pen), [stroke, pen]);
+
+  // Switching a pen on also applies it to anything already selected.
+  const togglePen = useCallback(
+    (mode: Exclude<Pen, null>) => {
+      const next = pen === mode ? null : mode;
+      setPen(next);
+      stroke(next);
+    },
+    [pen, stroke],
+  );
 
   const insertTable = useCallback(() => {
     const pad = padRef.current;
@@ -450,12 +503,12 @@ export default function Notes() {
         save();
       } else if (k === "h" && e.shiftKey) {
         e.preventDefault();
-        toggleHighlight();
+        togglePen("mark");
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [save, toggleHighlight]);
+  }, [save, togglePen]);
 
   useEffect(() => {
     if (!dirty) return;
@@ -610,15 +663,24 @@ export default function Notes() {
             <span className={s.label}>Insert</span>
             <div className={s.tools}>
               <button
-                className={`${s.tool} ${caret.inMark ? s.toolOn : ""}`}
+                className={`${s.tool} ${pen === "mark" ? s.toolOn : ""}`}
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={toggleHighlight}
-                aria-pressed={caret.inMark}
-                title="Highlight selection (Ctrl+Shift+H)"
+                onClick={() => togglePen("mark")}
+                aria-pressed={pen === "mark"}
+                title="Highlighter: drag over text to mark it (Ctrl+Shift+H)"
               >
-                <mark className={s.toolMark}>Highlight</mark>
+                <mark className={s.toolMark}>Highlighter</mark>
               </button>
-              {caret.inTable ? (
+              <button
+                className={`${s.tool} ${pen === "erase" ? s.toolOn : ""}`}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => togglePen("erase")}
+                aria-pressed={pen === "erase"}
+                title="Eraser: drag over highlighted text to clear it"
+              >
+                Eraser
+              </button>
+              {inTable ? (
                 <>
                   <button className={s.tool} onMouseDown={(e) => e.preventDefault()} onClick={addRow}>
                     + Row
@@ -655,7 +717,7 @@ export default function Notes() {
 
         <div
           ref={padRef}
-          className={`${s.pad} ${hydrated && isBlank(draft) ? s.padEmpty : ""}`}
+          className={`${s.pad} ${hydrated && isBlank(draft) ? s.padEmpty : ""} ${pen ? s.padPen : ""}`}
           style={{
             fontFamily: family,
             fontSize: draft.size,
@@ -667,6 +729,14 @@ export default function Notes() {
           suppressContentEditableWarning
           onInput={commit}
           onKeyDown={onPadKey}
+          onKeyUp={(e) => {
+            if (e.key === "Shift") strokeEnd();
+          }}
+          onPointerUp={strokeEnd}
+          onDragStart={(e) => {
+            // With a pen on, dragging over selected text must mark it, not move it.
+            if (pen) e.preventDefault();
+          }}
           onPaste={onPaste}
           data-placeholder="Write anything…"
           role="textbox"
